@@ -90,6 +90,10 @@
             color: var(--light-gray);
         }
         
+        nav ul li a:hover {
+            color: var(--light);
+        }
+        
         .auth-buttons .login {
             background: transparent;
             border: 1px solid var(--gray);
@@ -98,6 +102,11 @@
             border-radius: 6px;
             margin-right: 12px;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .auth-buttons .login:hover {
+            background: rgba(255,255,255,0.05);
         }
         
         .auth-buttons .signup {
@@ -107,6 +116,160 @@
             border-radius: 6px;
             border: none;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .auth-buttons .signup:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Homepage Sections */
+        section {
+            padding: 100px 0;
+        }
+        
+        .hero {
+            text-align: center;
+            padding-top: 150px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--darker) 100%);
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: var(--light-gray);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        .primary-cta {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 14px 36px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-2px);
+        }
+        
+        .features {
+            background: var(--darker);
+            text-align: center;
+        }
+        
+        .features h2 {
+            font-size: 36px;
+            margin-bottom: 60px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--light);
+        }
+        
+        .feature-card p {
+            color: var(--light-gray);
+        }
+        
+        .pricing {
+            text-align: center;
+        }
+        
+        .pricing h2 {
+            font-size: 36px;
+            margin-bottom: 60px;
+        }
+        
+        .pricing-table {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .plan {
+            background: rgba(255,255,255,0.03);
+            padding: 40px 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .plan h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--light);
+        }
+        
+        .price {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+        
+        .price span {
+            font-size: 16px;
+            color: var(--light-gray);
+        }
+        
+        .plan ul {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .plan ul li {
+            margin-bottom: 10px;
+            color: var(--light-gray);
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .plan ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+        }
+        
+        .plan-cta {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
         }
         
         /* Dashboard */
@@ -134,6 +297,11 @@
             margin-bottom: 30px;
         }
         
+        .connect-bot h3 {
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+        
         .connect-form input {
             width: 100%;
             padding: 12px 15px;
@@ -158,6 +326,7 @@
             align-items: center;
             padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--light);
         }
         
         .bot-status {
@@ -174,6 +343,27 @@
         .bot-status.offline {
             background: var(--danger);
         }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid, .pricing-table {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .features-grid, .pricing-table {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -181,9 +371,9 @@
         <div class="logo">Vireon</div>
         <nav>
             <ul>
-                <li><a href="#">Features</a></li>
-                <li><a href="#">Pricing</a></li>
-                <li><a href="#">Docs</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#docs">Docs</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
@@ -192,6 +382,83 @@
         </div>
     </header>
 
+    <!-- Homepage Content -->
+    <div id="homepage">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Host Your Discord Bot With Ease</h1>
+                <p>Vireon provides reliable 24/7 hosting for your Discord bots. Connect your existing bot or create a new one with our simple interface.</p>
+                <button class="primary-cta" id="heroSignupBtn">Get Started Free</button>
+                <p>No credit card required • 14-day premium trial</p>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="container">
+                <h2>Why Choose Vireon</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>24/7 Uptime</h3>
+                        <p>99.9% uptime guarantee for your bots with automatic failover</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Easy Setup</h3>
+                        <p>Connect your bot in seconds with just the token - no coding required</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Full Control</h3>
+                        <p>Manage your bot directly from our dashboard with real-time monitoring</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="pricing" id="pricing">
+            <div class="container">
+                <h2>Simple Pricing</h2>
+                <div class="pricing-table">
+                    <div class="plan">
+                        <h3>Starter</h3>
+                        <div class="price">$0<span>/month</span></div>
+                        <ul>
+                            <li>1 active bot</li>
+                            <li>10 commands</li>
+                            <li>Basic moderation</li>
+                            <li>Community support</li>
+                        </ul>
+                        <button class="plan-cta">Get Started</button>
+                    </div>
+                    <div class="plan">
+                        <h3>Pro</h3>
+                        <div class="price">$9.99<span>/month</span></div>
+                        <ul>
+                            <li>3 active bots</li>
+                            <li>Unlimited commands</li>
+                            <li>Advanced features</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <button class="plan-cta">Upgrade Now</button>
+                    </div>
+                    <div class="plan">
+                        <h3>Enterprise</h3>
+                        <div class="price">$24.99<span>/month</span></div>
+                        <ul>
+                            <li>Unlimited bots</li>
+                            <li>Unlimited commands</li>
+                            <li>All premium features</li>
+                            <li>24/7 dedicated support</li>
+                        </ul>
+                        <button class="plan-cta">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Dashboard (hidden by default) -->
     <div class="dashboard hidden" id="dashboard">
         <div class="sidebar">
             <h3>Dashboard</h3>
@@ -216,7 +483,9 @@
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
         const signupBtn = document.getElementById('signupBtn');
+        const heroSignupBtn = document.getElementById('heroSignupBtn');
         const dashboard = document.getElementById('dashboard');
+        const homepage = document.getElementById('homepage');
         const botConnectForm = document.getElementById('botConnectForm');
         const botsContainer = document.getElementById('botsContainer');
         
@@ -238,6 +507,7 @@
                     if (response.ok) {
                         currentUser = await response.json();
                         dashboard.classList.remove('hidden');
+                        homepage.classList.add('hidden');
                         loadBots();
                     }
                 } catch (error) {
@@ -314,6 +584,23 @@
         }
         
         // Event Listeners
+        loginBtn.addEventListener('click', () => {
+            // In a real app, this would show a login modal
+            localStorage.setItem('vireon_token', 'simulated_token');
+            checkAuth();
+        });
+        
+        signupBtn.addEventListener('click', () => {
+            // In a real app, this would show a signup modal
+            localStorage.setItem('vireon_token', 'simulated_token');
+            checkAuth();
+        });
+        
+        heroSignupBtn.addEventListener('click', () => {
+            localStorage.setItem('vireon_token', 'simulated_token');
+            checkAuth();
+        });
+        
         botConnectForm.addEventListener('submit', connectBot);
         
         // Initialize
