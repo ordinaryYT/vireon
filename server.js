@@ -4,8 +4,9 @@ const { Pool } = require('pg');
 const { Client, Intents } = require('discord.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const app = express();
 const path = require('path');
+
+const app = express();
 
 // Database connection
 const pool = new Pool({
@@ -17,7 +18,7 @@ const pool = new Pool({
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // For static files (if any)
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -64,17 +65,14 @@ function authenticate(req, res, next) {
 
 // API Endpoints
 
-// Signup
 app.post('/api/signup', async (req, res) => {
     try {
         const { email, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        
         const result = await pool.query(
             'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
             [email, hashedPassword]
         );
-        
         const token = jwt.sign({ id: result.rows[0].id, email }, JWT_SECRET);
         res.json({ token, user: result.rows[0] });
     } catch (err) {
@@ -82,23 +80,18 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-// Login
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        
         if (result.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        
         const user = result.rows[0];
         const validPassword = await bcrypt.compare(password, user.password);
-        
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
         res.json({ token, user: { id: user.id, email: user.email } });
     } catch (err) {
@@ -106,32 +99,22 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Get current user
 app.get('/api/me', authenticate, async (req, res) => {
     res.json({ id: req.user.id, email: req.user.email });
 });
 
-// Connect bot
 app.post('/api/bots', authenticate, async (req, res) => {
     try {
         const { token } = req.body;
-        
-        // Validate token with Discord
         const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
-        
+
         await client.login(token);
-        
-        // Save bot to database
         const result = await pool.query(
             'INSERT INTO bots (id, user_id, name, token, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [client.user.id, req.user.id, client.user.username, token, 'online']
         );
-        
         client.destroy();
-        
-        // In production, you would start hosting the bot here
-        // This is just a simulation
-        
+
         res.json(result.rows[0]);
     } catch (err) {
         console.error('Bot connection failed:', err);
@@ -139,7 +122,6 @@ app.post('/api/bots', authenticate, async (req, res) => {
     }
 });
 
-// Get user's bots
 app.get('/api/bots', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
@@ -152,7 +134,12 @@ app.get('/api/bots', authenticate, async (req, res) => {
     }
 });
 
-// Initialize database and start server
+// ✅ Serve index.html for all unmatched routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Initialize DB and start server
 initDB().then(() => {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
