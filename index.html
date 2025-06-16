@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vireon - Discord Bot Hosting</title>
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --primary-dark: #4b2e83;
+            --secondary: #9d50bb;
+            --accent: #4776E6;
+            --dark: #121218;
+            --darker: #0a0a0e;
+            --light: #f8f9fa;
+            --gray: #2d2d3a;
+            --light-gray: #b9bbbe;
+            --success: #3ba55c;
+            --danger: #ed4245;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        button, input, textarea {
+            font-family: inherit;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--darker);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            font-weight: 500;
+            color: var(--light-gray);
+        }
+        
+        .auth-buttons .login {
+            background: transparent;
+            border: 1px solid var(--gray);
+            color: var(--light);
+            padding: 10px 22px;
+            border-radius: 6px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .auth-buttons .signup {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 10px 22px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: flex;
+            min-height: calc(100vh - 70px);
+            margin-top: 70px;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--darker);
+            padding: 20px 0;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .connect-bot {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .connect-form input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--gray);
+            border-radius: 6px;
+            color: var(--light);
+            margin-bottom: 15px;
+        }
+        
+        .connect-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .bot-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .bot-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .bot-status.online {
+            background: var(--success);
+        }
+        
+        .bot-status.offline {
+            background: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Vireon</div>
+        <nav>
+            <ul>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Docs</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button class="login" id="loginBtn">Log In</button>
+            <button class="signup" id="signupBtn">Sign Up</button>
+        </div>
+    </header>
+
+    <div class="dashboard hidden" id="dashboard">
+        <div class="sidebar">
+            <h3>Dashboard</h3>
+        </div>
+        
+        <div class="main-content">
+            <div class="connect-bot">
+                <h3>Connect Your Discord Bot</h3>
+                <form class="connect-form" id="botConnectForm">
+                    <input type="password" id="botToken" placeholder="Paste your Discord bot token here">
+                    <button type="submit" class="connect-submit">Connect Bot</button>
+                </form>
+            </div>
+            
+            <div id="botsContainer">
+                <!-- Bots will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const dashboard = document.getElementById('dashboard');
+        const botConnectForm = document.getElementById('botConnectForm');
+        const botsContainer = document.getElementById('botsContainer');
+        
+        // API Base URL
+        const API_BASE = window.location.origin;
+        
+        // Current user
+        let currentUser = null;
+        
+        // Check auth state
+        async function checkAuth() {
+            const token = localStorage.getItem('vireon_token');
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE}/api/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        dashboard.classList.remove('hidden');
+                        loadBots();
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                }
+            }
+        }
+        
+        // Load user's bots
+        async function loadBots() {
+            try {
+                const response = await fetch(`${API_BASE}/api/bots`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('vireon_token')}` }
+                });
+                
+                if (response.ok) {
+                    const bots = await response.json();
+                    renderBots(bots);
+                }
+            } catch (error) {
+                console.error('Failed to load bots:', error);
+            }
+        }
+        
+        // Render bots list
+        function renderBots(bots) {
+            botsContainer.innerHTML = '';
+            
+            if (bots.length === 0) {
+                botsContainer.innerHTML = '<p>No bots connected yet</p>';
+                return;
+            }
+            
+            bots.forEach(bot => {
+                const botElement = document.createElement('div');
+                botElement.className = 'bot-item';
+                botElement.innerHTML = `
+                    <div class="bot-status ${bot.status}"></div>
+                    <div>
+                        <h4>${bot.name}</h4>
+                        <p>ID: ${bot.id}</p>
+                    </div>
+                `;
+                botsContainer.appendChild(botElement);
+            });
+        }
+        
+        // Connect bot form handler
+        async function connectBot(e) {
+            e.preventDefault();
+            const token = document.getElementById('botToken').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/bots`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('vireon_token')}`
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                if (response.ok) {
+                    alert('Bot connected successfully!');
+                    loadBots();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to connect bot');
+                }
+            } catch (error) {
+                console.error('Error connecting bot:', error);
+                alert('Failed to connect bot');
+            }
+        }
+        
+        // Event Listeners
+        botConnectForm.addEventListener('submit', connectBot);
+        
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>
