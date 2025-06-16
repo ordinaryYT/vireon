@@ -8,63 +8,21 @@ const path = require('path');
 
 const app = express();
 
-// Database connection
+// PostgreSQL connection
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: { rejectUnauthorized: false }
 });
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // For static files (if any)
 
-// JWT Secret
+// JWT secret key
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Create tables if they don't exist
-async function initDB() {
-    try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT NOW()
-            );
-            
-            CREATE TABLE IF NOT EXISTS bots (
-                id VARCHAR(255) PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id),
-                name VARCHAR(255) NOT NULL,
-                token VARCHAR(255) NOT NULL,
-                status VARCHAR(50) NOT NULL,
-                created_at TIMESTAMP DEFAULT NOW()
-            );
-        `);
-        console.log('Database initialized');
-    } catch (err) {
-        console.error('Database initialization failed:', err);
-    }
-}
+// API ROUTES
 
-// Auth middleware
-function authenticate(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Unauthorized' });
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        res.status(401).json({ error: 'Invalid token' });
-    }
-}
-
-// API Endpoints
-
+// Signup
 app.post('/api/signup', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -80,6 +38,7 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
+// Login
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -99,10 +58,26 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Auth middleware
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+}
+
+// Get current user
 app.get('/api/me', authenticate, async (req, res) => {
     res.json({ id: req.user.id, email: req.user.email });
 });
 
+// Add a bot
 app.post('/api/bots', authenticate, async (req, res) => {
     try {
         const { token } = req.body;
@@ -122,6 +97,7 @@ app.post('/api/bots', authenticate, async (req, res) => {
     }
 });
 
+// Get user's bots
 app.get('/api/bots', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
@@ -134,12 +110,39 @@ app.get('/api/bots', authenticate, async (req, res) => {
     }
 });
 
-// ✅ Serve index.html for all unmatched routes
-app.get('*', (req, res) => {
+// ✅ Serve the index.html at root
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Initialize DB and start server
+// ✅ Optional: serve static assets if you ever add CSS/JS
+// app.use(express.static(path.join(__dirname, 'public')));
+
+// Initialize DB & start server
+async function initDB() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+            CREATE TABLE IF NOT EXISTS bots (
+                id VARCHAR(255) PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                name VARCHAR(255) NOT NULL,
+                token VARCHAR(255) NOT NULL,
+                status VARCHAR(50) NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        console.log('Database initialized');
+    } catch (err) {
+        console.error('Database initialization failed:', err);
+    }
+}
+
 initDB().then(() => {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
