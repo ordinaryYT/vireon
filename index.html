@@ -1,281 +1,163 @@
+<!--  Vireon UI – old design, now with functional dashboard -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vireon - Discord Bot Hosting</title>
-    <style>
-        /* (Previous CSS remains exactly the same) */
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vireon – Discord Bot Hosting</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#6e48aa;--secondary:#9d50bb;
+      --dark:#121218;--darker:#0a0a0e;
+      --light:#f8f9fa;--gray:#2d2d3a;--light-gray:#b9bbbe;
+      --success:#3ba55c;--danger:#ed4245;--accent:#4776E6;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    body{background:var(--dark);color:var(--light);line-height:1.6;overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none;transition:.2s}
+    header{display:flex;justify-content:space-between;align-items:center;padding:20px 5%;background:var(--darker);position:fixed;width:100%;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.05)}
+    .logo{font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;color:transparent}
+    nav ul{display:flex;list-style:none}
+    nav ul li{margin-left:30px}
+    nav ul li a{font-weight:500;color:var(--light-gray)}
+    .auth-buttons button{border-radius:6px;padding:10px 22px;cursor:pointer}
+    .login{background:transparent;border:1px solid var(--gray);color:var(--light);margin-right:12px}
+    .signup{background:linear-gradient(90deg,var(--primary),var(--secondary));color:#fff;border:none}
+    /* Dashboard */
+    .dashboard{display:flex;min-height:calc(100vh - 70px);margin-top:70px}
+    .sidebar{width:250px;background:var(--darker);padding:25px 0}
+    .sidebar h3{padding:0 25px;margin-bottom:20px;font-size:20px}
+    .sidebar ul{list-style:none}
+    .sidebar li{padding:10px 25px;color:var(--light-gray);cursor:pointer}
+    .sidebar li:hover{background:rgba(255,255,255,.05)}
+    .main-content{flex:1;padding:40px}
+    .connect-bot{background:rgba(255,255,255,.03);border-radius:10px;padding:30px;margin-bottom:30px}
+    .connect-bot h3{margin-bottom:15px}
+    .connect-form input, .connect-form select{width:100%;padding:12px 15px;background:rgba(255,255,255,.05);border:1px solid var(--gray);border-radius:6px;color:var(--light);margin-bottom:15px}
+    .connect-submit{background:var(--primary);color:#fff;border:none;padding:12px 25px;border-radius:6px;cursor:pointer}
+    .bot-item{display:flex;align-items:center;padding:15px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .bot-status{width:10px;height:10px;border-radius:50%;margin-right:10px}
+    .bot-status.online{background:var(--success)}
+    .bot-status.offline{background:var(--danger)}
+  </style>
 </head>
 <body>
-    <!-- (Previous HTML remains the same until the script section) -->
+  <header>
+    <div class="logo">Vireon</div>
+    <nav>
+      <ul>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Docs</a></li>
+      </ul>
+    </nav>
+    <div class="auth-buttons">
+      <button class="login" id="loginBtn">Log In</button>
+      <button class="signup" id="signupBtn">Sign Up</button>
+    </div>
+  </header>
 
-    <script>
-        // DOM Elements
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        const authModal = document.getElementById('authModal');
-        const authForm = document.getElementById('authForm');
-        const authSubmit = document.getElementById('authSubmit');
-        const authSwitch = document.getElementById('authSwitch');
-        const dashboard = document.getElementById('dashboard');
-        const botsList = document.getElementById('botsList');
-        const connectBotBtn = document.getElementById('connectBotBtn');
-        const botConnectPanel = document.getElementById('botConnectPanel');
-        const commandEditor = document.getElementById('commandEditor');
-        const commandsList = document.getElementById('commandsList');
-        const commandSettings = document.getElementById('commandSettings');
-        const botTokenInput = document.getElementById('botToken');
-        const submitBotToken = document.getElementById('submitBotToken');
+  <div class="dashboard" id="dashboard">
+    <div class="sidebar">
+      <h3>Dashboard</h3>
+      <ul>
+        <li id="nav-bots">My Bots</li>
+        <li id="nav-commands">Commands</li>
+        <li id="nav-settings">Settings</li>
+      </ul>
+    </div>
 
-        // API Configuration
-        const API_BASE = window.location.origin;
-        let currentUser = null;
-        let currentBot = null;
+    <div class="main-content">
+      <!-- BOT CONNECT -->
+      <div class="connect-bot">
+        <h3>Connect Your Discord Bot</h3>
+        <form class="connect-form" id="botConnectForm">
+          <input type="password" id="botToken" placeholder="Paste your Discord bot token">
+          <select id="nodeSelect"><option value="">Select a node</option></select>
+          <button type="submit" class="connect-submit">Connect Bot</button>
+        </form>
+      </div>
 
-        // Initialize
-        checkAuth();
+      <!-- LIST OF BOTS -->
+      <div id="botsContainer"></div>
 
-        // Auth Functions
-        function toggleAuthModal(login = false) {
-            isLoginMode = login;
-            authModal.classList.toggle('hidden');
-            document.getElementById('modalTitle').textContent = login ? 'Log In' : 'Sign Up';
-            authSubmit.textContent = login ? 'Log In' : 'Sign Up';
-            authSwitch.innerHTML = login ? 
-                'Need an account? <a href="#">Sign Up</a>' : 
-                'Already have an account? <a href="#">Log In</a>';
-        }
+      <!-- SIMPLE COMMAND TOGGLE SECTION -->
+      <div id="commandsSection" class="hidden">
+        <h3>Command Toggles (demo)</h3>
+        <p>Coming soon – this is just a placeholder for your future command‑management UI.</p>
+      </div>
+    </div>
+  </div>
 
-        async function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            
-            try {
-                const endpoint = isLoginMode ? '/api/login' : '/api/register';
-                const response = await fetch(`${API_BASE}${endpoint}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+  <!-- ========================== JS ========================== -->
+  <script>
+    const API_BASE = '';  // same origin
+    const botConnectForm = document.getElementById('botConnectForm');
+    const botsContainer  = document.getElementById('botsContainer');
+    const nodeSelect     = document.getElementById('nodeSelect');
+    const commandsSection= document.getElementById('commandsSection');
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Authentication failed');
-                }
+    /* ------------- NAVIGATION (simple show/hide) ------------- */
+    document.getElementById('nav-bots').onclick = () => {
+      botsContainer.style.display   = '';
+      commandsSection.style.display = 'none';
+    };
+    document.getElementById('nav-commands').onclick = () => {
+      botsContainer.style.display   = 'none';
+      commandsSection.style.display = '';
+    };
 
-                const { token, user } = await response.json();
-                localStorage.setItem('vireon_token', token);
-                currentUser = user;
-                authModal.classList.add('hidden');
-                dashboard.classList.remove('hidden');
-                loadBots();
-            } catch (error) {
-                alert(error.message);
-            }
-        }
+    /* ------------- Load nodes for select ------------- */
+    async function loadNodes(){
+      const res  = await fetch(API_BASE+'/api/nodes');
+      const list = await res.json();
+      list.forEach(n=>{
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        nodeSelect.appendChild(opt);
+      });
+    }
 
-        // Bot Management Functions
-        async function loadBots() {
-            try {
-                const response = await fetch(`${API_BASE}/api/bots`, {
-                    headers: { 
-                        'Authorization': `Bearer ${localStorage.getItem('vireon_token')}`
-                    }
-                });
+    /* ------------- List running bots ------------- */
+    async function loadBots(){
+      const res  = await fetch(API_BASE+'/api/bots');
+      const bots = await res.json();
 
-                if (!response.ok) throw new Error('Failed to load bots');
-                
-                botsList.innerHTML = '';
-                const bots = await response.json();
-                
-                bots.forEach(bot => {
-                    const botElement = document.createElement('div');
-                    botElement.className = 'bot-item';
-                    botElement.innerHTML = `
-                        <h4>${bot.name}</h4>
-                        <p>Status: <span class="bot-status ${bot.status}">${bot.status}</span></p>
-                        <button onclick="manageBot('${bot.id}')">Manage</button>
-                    `;
-                    botsList.appendChild(botElement);
-                });
-            } catch (error) {
-                console.error('Error loading bots:', error);
-                alert('Failed to load bots');
-            }
-        }
+      botsContainer.innerHTML = bots.length ? '' : '<p>No bots connected yet.</p>';
+      bots.forEach(b=>{
+        const div = document.createElement('div');
+        div.className = 'bot-item';
+        div.innerHTML = `
+          <div class="bot-status online"></div>
+          <div>
+            <h4>${b.username}</h4>
+            <p>Node: ${b.node}</p>
+          </div>
+        `;
+        botsContainer.appendChild(div);
+      });
+    }
 
-        async function connectBot() {
-            const token = botTokenInput.value.trim();
-            if (!token) return alert('Please enter a bot token');
+    /* ------------- Connect bot ------------- */
+    botConnectForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      const token = document.getElementById('botToken').value.trim();
+      const node  = nodeSelect.value;
 
-            try {
-                const response = await fetch(`${API_BASE}/api/bots`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('vireon_token')}`
-                    },
-                    body: JSON.stringify({ token })
-                });
+      if(!token || !node){ alert('Token & node required'); return; }
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to connect bot');
-                }
+      const res = await fetch(API_BASE+'/api/bots', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ token, node })
+      });
+      const data = await res.json();
+      if(res.ok){ alert('Bot started: '+data.username); loadBots(); }
+      else      { alert(data.message || 'Failed to start bot'); }
+    });
 
-                const bot = await response.json();
-                botTokenInput.value = '';
-                botConnectPanel.classList.add('hidden');
-                loadBots();
-                alert(`Bot ${bot.name} connected successfully!`);
-            } catch (error) {
-                console.error('Error connecting bot:', error);
-                alert(error.message);
-            }
-        }
-
-        async function manageBot(botId) {
-            currentBot = botId;
-            commandEditor.classList.remove('hidden');
-            loadCommands(botId);
-        }
-
-        async function loadCommands(botId) {
-            try {
-                // In a real implementation, you would fetch commands from your API
-                // For this example, we'll use a predefined list
-                commandsList.innerHTML = `
-                    <div class="command-option" onclick="showCommandSettings('welcome')">
-                        <h4>Welcome Message</h4>
-                        <p>Send message when user joins</p>
-                    </div>
-                    <div class="command-option" onclick="showCommandSettings('moderation')">
-                        <h4>Moderation</h4>
-                        <p>Kick/ban users</p>
-                    </div>
-                    <div class="command-option" onclick="showCommandSettings('custom')">
-                        <h4>Custom Command</h4>
-                        <p>Create your own command</p>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error loading commands:', error);
-            }
-        }
-
-        function showCommandSettings(commandType) {
-            let settingsHTML = '';
-            
-            switch(commandType) {
-                case 'welcome':
-                    settingsHTML = `
-                        <h3>Welcome Message Settings</h3>
-                        <textarea id="welcomeMessage" placeholder="Enter welcome message (use {user} for mention)"></textarea>
-                        <button onclick="saveCommand('welcome', '!welcome', document.getElementById('welcomeMessage').value)">
-                            Save Welcome Message
-                        </button>
-                    `;
-                    break;
-                    
-                case 'moderation':
-                    settingsHTML = `
-                        <h3>Moderation Settings</h3>
-                        <select id="moderationAction">
-                            <option value="kick">Kick</option>
-                            <option value="ban">Ban</option>
-                            <option value="warn">Warn</option>
-                        </select>
-                        <input type="text" id="moderationCommand" placeholder="Command trigger (e.g., !kick)">
-                        <button onclick="saveCommand('moderation', document.getElementById('moderationCommand').value, 
-                            document.getElementById('moderationAction').value)">
-                            Save Moderation Command
-                        </button>
-                    `;
-                    break;
-                    
-                case 'custom':
-                    settingsHTML = `
-                        <h3>Custom Command</h3>
-                        <input type="text" id="customCommandName" placeholder="Command name (e.g., !hello)">
-                        <textarea id="customCommandResponse" placeholder="Command response"></textarea>
-                        <button onclick="saveCommand('custom', 
-                            document.getElementById('customCommandName').value,
-                            document.getElementById('customCommandResponse').value)">
-                            Save Custom Command
-                        </button>
-                    `;
-                    break;
-            }
-            
-            commandSettings.innerHTML = settingsHTML;
-        }
-
-        async function saveCommand(type, name, response) {
-            if (!name || !response) return alert('Please fill all fields');
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/commands`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('vireon_token')}`
-                    },
-                    body: JSON.stringify({
-                        botId: currentBot,
-                        commandName: name,
-                        commandResponse: response
-                    })
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to save command');
-                }
-
-                alert('Command saved successfully!');
-            } catch (error) {
-                console.error('Error saving command:', error);
-                alert(error.message);
-            }
-        }
-
-        // Event Listeners
-        loginBtn.addEventListener('click', () => toggleAuthModal(true));
-        signupBtn.addEventListener('click', () => toggleAuthModal(false));
-        authForm.addEventListener('submit', handleAuth);
-        authSwitch.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleAuthModal(!isLoginMode);
-        });
-        connectBotBtn.addEventListener('click', () => {
-            botConnectPanel.classList.remove('hidden');
-            commandEditor.classList.add('hidden');
-        });
-        submitBotToken.addEventListener('click', connectBot);
-
-        // Check authentication state
-        async function checkAuth() {
-            const token = localStorage.getItem('vireon_token');
-            if (!token) return;
-            
-            try {
-                // Verify token and get user data
-                // In a real app, you would call your API's /me endpoint
-                currentUser = { email: 'authenticated@user.com' };
-                dashboard.classList.remove('hidden');
-                loadBots();
-            } catch (error) {
-                localStorage.removeItem('vireon_token');
-            }
-        }
-
-        // Expose functions to global scope for button clicks
-        window.manageBot = manageBot;
-        window.showCommandSettings = showCommandSettings;
-        window.saveCommand = saveCommand;
-    </script>
+    /* ------------- Init ------------- */
+    loadNodes(); loadBots();
+  </script>
 </body>
 </html>
