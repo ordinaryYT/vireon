@@ -3,7 +3,6 @@ const path = require('path');
 const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
