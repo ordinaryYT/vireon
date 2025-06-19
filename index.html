@@ -1,163 +1,157 @@
-<!--  Vireon UI – old design, now with functional dashboard -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vireon – Discord Bot Hosting</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>Ogbots</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --primary:#6e48aa;--secondary:#9d50bb;
-      --dark:#121218;--darker:#0a0a0e;
-      --light:#f8f9fa;--gray:#2d2d3a;--light-gray:#b9bbbe;
-      --success:#3ba55c;--danger:#ed4245;--accent:#4776E6;
+    body {
+      background-color: #1a1d29;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-    body{background:var(--dark);color:var(--light);line-height:1.6;overflow-x:hidden}
-    a{color:var(--accent);text-decoration:none;transition:.2s}
-    header{display:flex;justify-content:space-between;align-items:center;padding:20px 5%;background:var(--darker);position:fixed;width:100%;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.05)}
-    .logo{font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;color:transparent}
-    nav ul{display:flex;list-style:none}
-    nav ul li{margin-left:30px}
-    nav ul li a{font-weight:500;color:var(--light-gray)}
-    .auth-buttons button{border-radius:6px;padding:10px 22px;cursor:pointer}
-    .login{background:transparent;border:1px solid var(--gray);color:var(--light);margin-right:12px}
-    .signup{background:linear-gradient(90deg,var(--primary),var(--secondary));color:#fff;border:none}
-    /* Dashboard */
-    .dashboard{display:flex;min-height:calc(100vh - 70px);margin-top:70px}
-    .sidebar{width:250px;background:var(--darker);padding:25px 0}
-    .sidebar h3{padding:0 25px;margin-bottom:20px;font-size:20px}
-    .sidebar ul{list-style:none}
-    .sidebar li{padding:10px 25px;color:var(--light-gray);cursor:pointer}
-    .sidebar li:hover{background:rgba(255,255,255,.05)}
-    .main-content{flex:1;padding:40px}
-    .connect-bot{background:rgba(255,255,255,.03);border-radius:10px;padding:30px;margin-bottom:30px}
-    .connect-bot h3{margin-bottom:15px}
-    .connect-form input, .connect-form select{width:100%;padding:12px 15px;background:rgba(255,255,255,.05);border:1px solid var(--gray);border-radius:6px;color:var(--light);margin-bottom:15px}
-    .connect-submit{background:var(--primary);color:#fff;border:none;padding:12px 25px;border-radius:6px;cursor:pointer}
-    .bot-item{display:flex;align-items:center;padding:15px;border-bottom:1px solid rgba(255,255,255,.05)}
-    .bot-status{width:10px;height:10px;border-radius:50%;margin-right:10px}
-    .bot-status.online{background:var(--success)}
-    .bot-status.offline{background:var(--danger)}
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
+      border-bottom: 1px solid #fff;
+      background-color: #12141c;
+    }
+    .nav div {
+      cursor: pointer;
+      text-align: center;
+      padding: 10px;
+      transition: background 0.3s;
+    }
+    .nav div:hover {
+      background-color: #292c3f;
+    }
+    .section {
+      display: none;
+      padding: 50px;
+      text-align: center;
+    }
+    .active {
+      display: block;
+    }
+    .btn {
+      background-color: #ffb800;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      margin: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 300px;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #444;
+      margin-top: 40px;
+    }
+    a {
+      color: #ffb800;
+      text-decoration: none;
+    }
+    ul.command-list {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    ul.command-list li {
+      background: #292c3f;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 8px;
+    }
+    code {
+      color: #ffb800;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">Vireon</div>
-    <nav>
-      <ul>
-        <li><a href="#">Features</a></li>
-        <li><a href="#">Pricing</a></li>
-        <li><a href="#">Docs</a></li>
-      </ul>
-    </nav>
-    <div class="auth-buttons">
-      <button class="login" id="loginBtn">Log In</button>
-      <button class="signup" id="signupBtn">Sign Up</button>
-    </div>
-  </header>
-
-  <div class="dashboard" id="dashboard">
-    <div class="sidebar">
-      <h3>Dashboard</h3>
-      <ul>
-        <li id="nav-bots">My Bots</li>
-        <li id="nav-commands">Commands</li>
-        <li id="nav-settings">Settings</li>
-      </ul>
-    </div>
-
-    <div class="main-content">
-      <!-- BOT CONNECT -->
-      <div class="connect-bot">
-        <h3>Connect Your Discord Bot</h3>
-        <form class="connect-form" id="botConnectForm">
-          <input type="password" id="botToken" placeholder="Paste your Discord bot token">
-          <select id="nodeSelect"><option value="">Select a node</option></select>
-          <button type="submit" class="connect-submit">Connect Bot</button>
-        </form>
-      </div>
-
-      <!-- LIST OF BOTS -->
-      <div id="botsContainer"></div>
-
-      <!-- SIMPLE COMMAND TOGGLE SECTION -->
-      <div id="commandsSection" class="hidden">
-        <h3>Command Toggles (demo)</h3>
-        <p>Coming soon – this is just a placeholder for your future command‑management UI.</p>
-      </div>
-    </div>
+  <div class="nav">
+    <div onclick="showSection('create')">Create Bot</div>
+    <div onclick="showSection('token')">Add Token</div>
+    <div onclick="showSection('dashboard')">Dashboard</div>
+    <div onclick="showSection('commands')">Commands</div>
   </div>
 
-  <!-- ========================== JS ========================== -->
+  <div id="create" class="section active">
+    <h1>Welcome to Ogbots!</h1>
+    <p>Create your bot in the <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a>.</p>
+    <button class="btn" onclick="showSection('token')">Next: Add Token</button>
+  </div>
+
+  <div id="token" class="section">
+    <h1>Paste Your Bot Token</h1>
+    <input type="text" id="botTokenInput" placeholder="Paste your bot token here">
+    <br>
+    <button class="btn" onclick="connectBot()">Connect & Start Bot</button>
+  </div>
+
+  <div id="dashboard" class="section">
+    <h1>Bot Dashboard</h1>
+    <p>Your bot is running. Use <code>!ping</code> in your server to test it.</p>
+  </div>
+
+  <div id="commands" class="section">
+    <h1>Working Commands</h1>
+    <ul class="command-list">
+      <li><code>!ping</code> — Replies with Pong!</li>
+      <li><code>!hello</code> — Greets you back.</li>
+      <li><code>!say &lt;message&gt;</code> — Bot repeats your message.</li>
+      <li><code>!userinfo</code> — Shows your Discord username and ID.</li>
+      <li><code>!help</code> — Lists all available commands.</li>
+      <li><code>!time</code> — Shows current server time.</li>
+      <li><code>!server</code> — Displays server name and member count.</li>
+      <li><code>!bot</code> — Displays the bot's name and status.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    You're signed in as @ordinarygamerlyt | <a href="#">Logout</a>
+  </div>
+
   <script>
-    const API_BASE = '';  // same origin
-    const botConnectForm = document.getElementById('botConnectForm');
-    const botsContainer  = document.getElementById('botsContainer');
-    const nodeSelect     = document.getElementById('nodeSelect');
-    const commandsSection= document.getElementById('commandsSection');
-
-    /* ------------- NAVIGATION (simple show/hide) ------------- */
-    document.getElementById('nav-bots').onclick = () => {
-      botsContainer.style.display   = '';
-      commandsSection.style.display = 'none';
-    };
-    document.getElementById('nav-commands').onclick = () => {
-      botsContainer.style.display   = 'none';
-      commandsSection.style.display = '';
-    };
-
-    /* ------------- Load nodes for select ------------- */
-    async function loadNodes(){
-      const res  = await fetch(API_BASE+'/api/nodes');
-      const list = await res.json();
-      list.forEach(n=>{
-        const opt = document.createElement('option');
-        opt.value = n; opt.textContent = n;
-        nodeSelect.appendChild(opt);
-      });
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
     }
 
-    /* ------------- List running bots ------------- */
-    async function loadBots(){
-      const res  = await fetch(API_BASE+'/api/bots');
-      const bots = await res.json();
+    function connectBot() {
+      const token = document.getElementById('botTokenInput').value.trim();
+      if (!token) return alert('Please enter a bot token.');
 
-      botsContainer.innerHTML = bots.length ? '' : '<p>No bots connected yet.</p>';
-      bots.forEach(b=>{
-        const div = document.createElement('div');
-        div.className = 'bot-item';
-        div.innerHTML = `
-          <div class="bot-status online"></div>
-          <div>
-            <h4>${b.username}</h4>
-            <p>Node: ${b.node}</p>
-          </div>
-        `;
-        botsContainer.appendChild(div);
-      });
+      fetch('/start-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('Bot connected!');
+            showSection('dashboard');
+          } else {
+            alert('Error: ' + data.message);
+          }
+        }).catch(() => {
+          alert('Server error.');
+        });
     }
-
-    /* ------------- Connect bot ------------- */
-    botConnectForm.addEventListener('submit', async e=>{
-      e.preventDefault();
-      const token = document.getElementById('botToken').value.trim();
-      const node  = nodeSelect.value;
-
-      if(!token || !node){ alert('Token & node required'); return; }
-
-      const res = await fetch(API_BASE+'/api/bots', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ token, node })
-      });
-      const data = await res.json();
-      if(res.ok){ alert('Bot started: '+data.username); loadBots(); }
-      else      { alert(data.message || 'Failed to start bot'); }
-    });
-
-    /* ------------- Init ------------- */
-    loadNodes(); loadBots();
   </script>
 </body>
 </html>
