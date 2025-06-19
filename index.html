@@ -5,81 +5,20 @@
   <title>Ogbots</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      background-color: #1a1d29;
-      color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .nav {
-      display: flex;
-      justify-content: space-around;
-      padding: 15px;
-      border-bottom: 1px solid #fff;
-      background-color: #12141c;
-    }
-    .nav div {
-      cursor: pointer;
-      text-align: center;
-      padding: 10px;
-      transition: background 0.3s;
-    }
-    .nav div:hover {
-      background-color: #292c3f;
-    }
-    .section {
-      display: none;
-      padding: 50px;
-      text-align: center;
-    }
-    .active {
-      display: block;
-    }
-    .btn {
-      background-color: #ffb800;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      margin: 10px;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-    input {
-      width: 300px;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    .footer {
-      text-align: center;
-      padding: 20px;
-      border-top: 1px solid #444;
-      margin-top: 40px;
-    }
-    a {
-      color: #ffb800;
-      text-decoration: none;
-    }
-    ul.command-list {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-      max-width: 600px;
-      margin: 20px auto;
-    }
-    ul.command-list li {
-      background: #292c3f;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 8px;
-    }
-    code {
-      color: #ffb800;
-      font-weight: bold;
-    }
+    body { background-color: #1a1d29; color: white; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .nav { display: flex; justify-content: space-around; padding: 15px; border-bottom: 1px solid #fff; background-color: #12141c; }
+    .nav div { cursor: pointer; text-align: center; padding: 10px; transition: background 0.3s; }
+    .nav div:hover { background-color: #292c3f; }
+    .section { display: none; padding: 50px; text-align: center; }
+    .active { display: block; }
+    .btn { background-color: #ffb800; color: black; padding: 10px 20px; border: none; cursor: pointer; margin: 10px; border-radius: 5px; font-weight: bold; }
+    input[type="text"] { width: 80%; padding: 10px; margin: 20px auto; display: block; border-radius: 5px; border: none; }
+    .footer { text-align: center; padding: 20px; border-top: 1px solid #444; margin-top: 40px; }
+    a { color: #ffb800; text-decoration: none; }
+    h2 { color: #ffb800; }
+    ul.command-list { list-style: none; padding: 0; max-width: 700px; margin: 20px auto; text-align: left; }
+    ul.command-list li { background: #292c3f; padding: 10px; border-radius: 5px; margin: 6px 0; }
+    code { color: #ffb800; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -109,17 +48,56 @@
   </div>
 
   <div id="commands" class="section">
-    <h1>Working Commands</h1>
-    <ul class="command-list">
-      <li><code>!ping</code> — Replies with Pong!</li>
-      <li><code>!hello</code> — Greets you back.</li>
-      <li><code>!say &lt;message&gt;</code> — Bot repeats your message.</li>
-      <li><code>!userinfo</code> — Shows your Discord username and ID.</li>
-      <li><code>!help</code> — Lists all available commands.</li>
-      <li><code>!time</code> — Shows current server time.</li>
-      <li><code>!server</code> — Displays server name and member count.</li>
-      <li><code>!bot</code> — Displays the bot's name and status.</li>
-    </ul>
+    <h1>Command Center</h1>
+    <input type="text" id="commandSearch" placeholder="Search commands..." onkeyup="filterCommands()">
+
+    <div class="command-section">
+      <h2>General Commands</h2>
+      <ul class="command-list" id="general">
+        <li><code>!ping</code> — Test the bot's connection.</li>
+        <li><code>!hello</code> — Greet the bot.</li>
+        <li><code>!say &lt;text&gt;</code> — Make the bot repeat your message.</li>
+        <li><code>!userinfo</code> — Get your username and ID.</li>
+        <li><code>!time</code> — Shows current server time.</li>
+        <li><code>!bot</code> — Shows bot info.</li>
+        <li><code>!server</code> — Server info (name, members).</li>
+        <li><code>!help</code> — Lists all commands.</li>
+        <li><code>!avatar</code> — Get your profile picture.</li>
+        <li><code>!dm &lt;text&gt;</code> — Bot DMs you the message.</li>
+      </ul>
+    </div>
+
+    <div class="command-section">
+      <h2>Moderation Commands</h2>
+      <ul class="command-list" id="moderation">
+        <li><code>!kick @user</code> — Kicks a member.</li>
+        <li><code>!ban @user</code> — Bans a member.</li>
+        <li><code>!unban username#1234</code> — Unbans a user.</li>
+        <li><code>!mute @user</code> — Mutes a member.</li>
+        <li><code>!unmute @user</code> — Unmutes a member.</li>
+        <li><code>!clear &lt;amount&gt;</code> — Deletes messages.</li>
+        <li><code>!warn @user</code> — Issues a warning.</li>
+        <li><code>!infractions @user</code> — Shows warnings.</li>
+        <li><code>!lock</code> — Locks the channel.</li>
+        <li><code>!unlock</code> — Unlocks the channel.</li>
+      </ul>
+    </div>
+
+    <div class="command-section">
+      <h2>Fun Commands</h2>
+      <ul class="command-list" id="fun">
+        <li><code>!meme</code> — Sends a random meme.</li>
+        <li><code>!joke</code> — Tells a random joke.</li>
+        <li><code>!8ball &lt;question&gt;</code> — Magic 8-Ball response.</li>
+        <li><code>!roll</code> — Rolls a dice.</li>
+        <li><code>!flip</code> — Coin flip.</li>
+        <li><code>!cat</code> — Random cat picture.</li>
+        <li><code>!dog</code> — Random dog picture.</li>
+        <li><code>!rate @user</code> — Rates the user 1–10.</li>
+        <li><code>!simprate</code> — Simp rating.</li>
+        <li><code>!howgay</code> — Humorously estimates gayness.</li>
+      </ul>
+    </div>
   </div>
 
   <div class="footer">
@@ -127,9 +105,9 @@
   </div>
 
   <script>
-    function showSection(sectionId) {
+    function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(sectionId).classList.add('active');
+      document.getElementById(id).classList.add('active');
     }
 
     function connectBot() {
@@ -151,6 +129,14 @@
         }).catch(() => {
           alert('Server error.');
         });
+    }
+
+    function filterCommands() {
+      const input = document.getElementById("commandSearch").value.toLowerCase();
+      document.querySelectorAll('.command-list li').forEach(li => {
+        const text = li.textContent.toLowerCase();
+        li.style.display = text.includes(input) ? "" : "none";
+      });
     }
   </script>
 </body>
